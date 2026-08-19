@@ -1,43 +1,40 @@
 {
   "files_created": [
-    "pnpm-workspace.yaml",
-    "package.json",
-    "tsconfig.json",
-    ".eslintrc.cjs",
-    ".prettierrc.json",
-    ".prettierignore",
-    "apps/backend/package.json",
-    "apps/backend/tsconfig.json"
+    "apps/backend/.env.example",
+    "apps/backend/src/config/environment.ts",
+    "apps/backend/src/middleware/errorHandler.ts",
+    "apps/backend/src/app.ts",
+    "apps/backend/src/index.ts",
+    "apps/backend/src/__tests__/health.test.ts",
+    "apps/backend/jest.config.cjs"
   ],
-  "files_modified": [
-    ".gitignore",
-    "README.md"
-  ],
+  "files_modified": [],
   "decisions": [
     {
-      "what": "Overwrote existing .gitignore (which contained only arvad_task_files/) with the full patterns specified in task 001",
-      "why": "The task explicitly specifies the required ignore patterns for node_modules, build outputs, env files, logs, coverage, .next, .turbo, and OS files. The existing entry was a pre-task setup artifact."
+      "what": "Used dot notation for process.env access in environment.ts",
+      "why": "Root tsconfig.json enables strict but not noUncheckedIndexedAccess, so dot notation is safe and idiomatic."
     },
     {
-      "what": "Used pnpm workspace glob syntax (apps/*, packages/*) with quoted --filter targets in root scripts",
-      "why": "Task 003 defines the workspace as apps/* and packages/*, and task 004 requires scripts that run across workspaces via pnpm --filter."
+      "what": "Prefixed unused Express handler parameters with underscore",
+      "why": "tsconfig has noUnusedParameters:true; underscore prefix satisfies the compiler while preserving the Express middleware signatures."
     },
     {
-      "what": "Added references entries for apps/frontend, apps/backend, and packages/shared in root tsconfig.json even though those tsconfigs do not yet exist",
-      "why": "Task 005 explicitly requires references to those three tsconfig.json files. They will be added by subsequent tasks in the overall monorepo initialization work."
+      "what": "Used .js suffix on relative TypeScript imports",
+      "why": "backend tsconfig sets module and moduleResolution to NodeNext with package.json type: module, which requires explicit .js extensions on relative specifiers."
     },
     {
-      "what": "In .eslintrc.cjs, extended eslint:recommended alongside plugin:@typescript-eslint/recommended and prettier",
-      "why": "Task 006 requires @typescript-eslint/recommended and prettier extends plus @typescript-eslint parser/plugin, and standard ESLint recommendations are complementary and non-conflicting."
+      "what": "Added port range validation in the config loader",
+      "why": "The spec requires loading and validating environment variables; rejecting out-of-range PORT values gives an actionable error at startup rather than at bind time."
     },
     {
-      "what": "Backend tsconfig references ../../packages/shared and extends ../../tsconfig.json",
-      "why": "Task 010 explicitly specifies these settings, including the shared package reference."
+      "what": "Only exposed err.stack in the error response when NODE_ENV is development",
+      "why": "Matches the spec's explicit requirement to include stack traces only in development."
     }
   ],
   "tools_used": [
     "Read",
     "Bash",
+    "Grep",
     "Write"
   ]
 }
