@@ -1,40 +1,49 @@
 {
   "files_created": [
-    "apps/backend/.env.example",
-    "apps/backend/src/config/environment.ts",
-    "apps/backend/src/middleware/errorHandler.ts",
-    "apps/backend/src/app.ts",
-    "apps/backend/src/index.ts",
-    "apps/backend/src/__tests__/health.test.ts",
-    "apps/backend/jest.config.cjs"
+    "apps/backend/prisma/schema.prisma",
+    "apps/backend/prisma/seed.ts",
+    "apps/backend/src/lib/prisma.ts",
+    "apps/backend/src/__tests__/prisma.test.ts",
+    "apps/backend/docker-compose.yml"
   ],
-  "files_modified": [],
+  "files_modified": [
+    "apps/backend/.env.example",
+    "apps/backend/package.json"
+  ],
   "decisions": [
     {
-      "what": "Used dot notation for process.env access in environment.ts",
-      "why": "Root tsconfig.json enables strict but not noUncheckedIndexedAccess, so dot notation is safe and idiomatic."
+      "what": "Added DATABASE_URL and commented-out DIRECT_URL to apps/backend/.env.example",
+      "why": "Spec required a documented PostgreSQL connection string plus optional pooling URL for services like Supabase; keeping DIRECT_URL commented avoids overriding the default direct connection."
     },
     {
-      "what": "Prefixed unused Express handler parameters with underscore",
-      "why": "tsconfig has noUnusedParameters:true; underscore prefix satisfies the compiler while preserving the Express middleware signatures."
+      "what": "Added @prisma/client and prisma dependencies plus prisma:* scripts and prisma.seed config to apps/backend/package.json",
+      "why": "Enables running prisma generate/migrate/studio and the tsx-based seed script exactly as described in the task."
     },
     {
-      "what": "Used .js suffix on relative TypeScript imports",
-      "why": "backend tsconfig sets module and moduleResolution to NodeNext with package.json type: module, which requires explicit .js extensions on relative specifiers."
+      "what": "Modeled Prisma enums (UserRole, BookingStatus, PaymentStatus, NotificationType, NotificationChannel, NotificationStatus) instead of stringly-typed columns",
+      "why": "Prisma requires named enum types; splitting per model keeps the schema self-documenting and matches the enum values listed in the spec."
     },
     {
-      "what": "Added port range validation in the config loader",
-      "why": "The spec requires loading and validating environment variables; rejecting out-of-range PORT values gives an actionable error at startup rather than at bind time."
+      "what": "Seed script clears data in dependency order and uses bcrypt to hash the demo passwords",
+      "why": "FK constraints require dependents (payments/bookings/notifications/audit logs) to be removed before users/services; bcrypt was explicitly requested in the spec."
     },
     {
-      "what": "Only exposed err.stack in the error response when NODE_ENV is development",
-      "why": "Matches the spec's explicit requirement to include stack traces only in development."
+      "what": "Reused apps/backend/src/config/environment.ts to detect production instead of reading NODE_ENV directly in the Prisma singleton",
+      "why": "Matches the existing config abstraction and avoids duplicating environment parsing logic."
+    },
+    {
+      "what": "Prisma integration test asserts that user deletion is rejected while related bookings exist (rather than cascading)",
+      "why": "The schema does not declare onDelete: Cascade for the User <- Booking relation, so the expected behavior is FK rejection; documenting that keeps the test aligned with the schema."
+    },
+    {
+      "what": "Docker Compose uses postgres:15-alpine with a named postgres_data volume and pg_isready healthcheck",
+      "why": "Matches the task requirements verbatim while providing a persistent local database that mirrors production."
     }
   ],
   "tools_used": [
     "Read",
-    "Bash",
-    "Grep",
-    "Write"
+    "Write",
+    "Edit",
+    "Bash"
   ]
 }

@@ -1,0 +1,39 @@
+# Local development stack for the Studio Booking & Payment Platform backend.
+# Brings up a PostgreSQL 15 instance that matches production so migrations,
+# seeds, and integration tests can run against a realistic database.
+version: "3.8"
+
+services:
+  # PostgreSQL database used by Prisma. Credentials mirror the defaults in
+  # apps/backend/.env.example; override via a local .env file if needed.
+  postgres:
+    image: postgres:15-alpine
+    container_name: studio-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: studio_user
+      POSTGRES_PASSWORD: studio_pass
+      POSTGRES_DB: studio_booking_dev
+    ports:
+      # Expose the standard Postgres port so the backend can connect from the host.
+      - "5432:5432"
+    volumes:
+      # Persist database contents across container restarts.
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # pg_isready confirms the server accepts connections before dependents start.
+      test: ["CMD-SHELL", "pg_isready -U studio_user -d studio_booking_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  # Named volume so data survives `docker compose down` (but not `-v`).
+  postgres_data:
+
+networks:
+  # Explicit default network keeps naming predictable for other services
+  # that may later attach to this compose file.
+  default:
+    name: studio-backend
