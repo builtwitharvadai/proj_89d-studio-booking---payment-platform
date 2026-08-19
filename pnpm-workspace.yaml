@@ -1,0 +1,8 @@
+# pnpm workspace configuration
+# Defines the package locations that make up the monorepo.
+#
+# - apps/*     : Deployable applications (Next.js frontend, Express.js backend)
+# - packages/* : Shared libraries consumed by the apps (types, utilities)
+packages:
+  - 'apps/*'
+  - 'packages/*'
